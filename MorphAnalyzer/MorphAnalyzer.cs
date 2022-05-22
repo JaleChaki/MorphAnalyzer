@@ -10,13 +10,13 @@ namespace MorphAnalyzer {
         
         public MorphAnalyzer(string language = "ru") {
             Dictionary = LanguageDictionaryReader.Read(Path.Combine(@"Dictionaries\", language));
-            var dictionaryAnalyzer = new DictionaryAnalyzerUnit(Dictionary);
+            var dictionaryAnalyzer = new DictionaryAnalyzer(Dictionary);
             AnalyzerUnits = new List<IMorphAnalyzerUnit> {
                 dictionaryAnalyzer, 
-                new KnownPrefixAnalyzerUnit(this, Dictionary.KnownPrefixes),
+                new KnownPrefixAnalyzer(this, Dictionary.KnownPrefixes),
                 new HyphenSeparatedParticleAnalyzer(dictionaryAnalyzer, Dictionary.Hyphens),
                 new HyphenAdverbAnalyzer(this),
-                new UnknownPrefixAnalyzerUnit(dictionaryAnalyzer)
+                new UnknownPrefixAnalyzer(dictionaryAnalyzer)
             };
         }
 

@@ -5,14 +5,14 @@ using Xunit;
 
 // ReSharper disable StringLiteralTypo
 namespace MorphAnalyzer.Tests.AnalyzerUnits {
-    public class KnownPrefixAnalyzerUnitTests : AnalyzerUnitTester<KnownPrefixAnalyzerUnit> {
+    public class KnownPrefixAnalyzerTests : AnalyzerUnitTester<KnownPrefixAnalyzer> {
 
         [Theory]
         [InlineData("Ru", "квазирыбой", 1, "квазирыба=NOUN,anim,femn sing,ablt")]
         [InlineData("Ru", "космодома", 4, 
-            "космодома=ADVB;" + 
-            "космодом=NOUN,inan,masc sing,gent;" + 
-            "космодом=NOUN,inan,masc plur,nomn;" + 
+            "космодома=ADVB;" +
+            "космодом=NOUN,inan,masc sing,gent;" +
+            "космодом=NOUN,inan,masc plur,nomn;" +
             "космодом=NOUN,inan,masc plur,accs")]
         public void ParseKnownPrefix_MultipleSignificances(string language, string word, int expectedResultsCount, string expectedLexemesWithTags) {
             var lexemesAndTags = ExtractLexemesAndTags(expectedLexemesWithTags);

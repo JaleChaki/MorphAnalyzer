@@ -42,13 +42,13 @@ namespace MorphAnalyzer.Tests {
             language = language.ToLower();
             var dictionary = GetLanguageDictionary(language);
             AnalyzerUnits ??= new Dictionary<string, List<IMorphAnalyzerUnit>>();
-            var dictionaryAnalyzer = new DictionaryAnalyzerUnit(dictionary);
+            var dictionaryAnalyzer = new DictionaryAnalyzer(dictionary);
             var composite = new AnalyzerUnitComposite();
             var list = new List<IMorphAnalyzerUnit> {
                 dictionaryAnalyzer,
-                new KnownPrefixAnalyzerUnit(composite, dictionary.KnownPrefixes),
+                new KnownPrefixAnalyzer(composite, dictionary.KnownPrefixes),
                 new HyphenSeparatedParticleAnalyzer(composite, dictionary.Hyphens),
-                new UnknownPrefixAnalyzerUnit(composite)
+                new UnknownPrefixAnalyzer(composite)
             };
             composite.AnalyzerUnits = list;
             

@@ -3,9 +3,9 @@
     /// <summary>
     /// Analyzer unit that analyzes word using dictionary
     /// </summary>
-    public class DictionaryAnalyzerUnit : IMorphAnalyzerUnit {
+    public class DictionaryAnalyzer : IMorphAnalyzerUnit {
 
-        internal DictionaryAnalyzerUnit(LanguageDictionary dictionary) {
+        internal DictionaryAnalyzer(LanguageDictionary dictionary) {
             Dictionary = dictionary;
         }
 

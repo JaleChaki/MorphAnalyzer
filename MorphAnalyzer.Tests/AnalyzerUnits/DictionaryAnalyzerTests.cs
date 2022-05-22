@@ -4,7 +4,7 @@ using Xunit;
 
 // ReSharper disable StringLiteralTypo
 namespace MorphAnalyzer.Tests.AnalyzerUnits {
-    public class DictionaryAnalyzerUnitTests : AnalyzerUnitTester<DictionaryAnalyzerUnit> {
+    public class DictionaryAnalyzerTests : AnalyzerUnitTester<DictionaryAnalyzer> {
         
         [Theory]
         [InlineData("Ru", "рыбой", 1, "рыба", "NOUN,anim,femn sing,ablt")]

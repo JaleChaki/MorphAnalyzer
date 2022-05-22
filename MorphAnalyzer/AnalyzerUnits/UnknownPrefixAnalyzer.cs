@@ -1,9 +1,9 @@
 ﻿using MorphAnalyzer.AnalyzerUnits.Helpers;
 
 namespace MorphAnalyzer.AnalyzerUnits {
-    public class UnknownPrefixAnalyzerUnit : IMorphAnalyzerUnit {
+    public class UnknownPrefixAnalyzer : IMorphAnalyzerUnit {
 
-        public UnknownPrefixAnalyzerUnit(ISimpleMorphAnalyzer nextAnalyzer, int maxPrefixLength = 5, int minSuffixLength = 3) {
+        public UnknownPrefixAnalyzer(ISimpleMorphAnalyzer nextAnalyzer, int maxPrefixLength = 5, int minSuffixLength = 3) {
             NextAnalyzer = nextAnalyzer;
             MaxPrefixLength = maxPrefixLength;
             MinSuffixLength = minSuffixLength;
