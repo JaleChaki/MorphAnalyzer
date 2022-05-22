@@ -54,7 +54,7 @@ namespace MorphAnalyzer.AnalyzerUnits {
         private MorphologicalSignificance BuildMorphologicalSignificance(MorphologicalSignificance internalSignificance, string particle) {
             return new MorphologicalSignificance(
                 internalSignificance.RawWord + particle,
-                internalSignificance.NormalForm,
+                internalSignificance.NormalForm + particle,
                 internalSignificance,
                 internalSignificance.Tag,
                 this,

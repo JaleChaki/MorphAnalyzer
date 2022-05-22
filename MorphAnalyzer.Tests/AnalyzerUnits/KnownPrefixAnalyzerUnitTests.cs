@@ -5,63 +5,49 @@ using Xunit;
 
 // ReSharper disable StringLiteralTypo
 namespace MorphAnalyzer.Tests.AnalyzerUnits {
-    public class KnownPrefixAnalyzerUnitTests {
+    public class KnownPrefixAnalyzerUnitTests : AnalyzerUnitTester<KnownPrefixAnalyzerUnit> {
 
         [Theory]
-        [InlineData("Ru", "квазирыбой", "квазирыба", "NOUN,anim,femn sing,ablt")]
-        public void ParseKnownPrefix_SingleSignificance(string language, string word, string expectedNormalForm, string expectedTag) {
-            var analyzerUnit = Utils.GetAnalyzerUnit<KnownPrefixAnalyzerUnit>(language);
-            var significances = analyzerUnit.Parse(word, Array.Empty<IMorphAnalyzerUnit>());
-            
-            Assert.Equal(1, significances.Count);
-            Assert.Equal(expectedNormalForm, significances[0].NormalForm);
-            Assert.Equal(expectedTag, significances[0].Tag.DebugValue);
-        }
-
-        [Theory]
-        [InlineData("Ru", "космодома", 4, "космодома;космодом;космодом;космодом", "ADVB;NOUN,inan,masc sing,gent;NOUN,inan,masc plur,nomn;NOUN,inan,masc plur,accs")]
-        public void ParseKnownPrefix_MultipleSignificances(string language, string word, int expectedResultsCount, string expectedNormalForms, string expectedTags) {
-            var analyzerUnit = Utils.GetAnalyzerUnit<KnownPrefixAnalyzerUnit>(language);
-            var significances = analyzerUnit.Parse(word, Array.Empty<IMorphAnalyzerUnit>());
-            Assert.Equal(expectedResultsCount, significances.Count);
-
-            var normalForms = expectedNormalForms.Split(';');
-            var tags = expectedTags.Split(';');
-
-            Assert.Equal(expectedResultsCount, normalForms.Length);
-            Assert.Equal(expectedResultsCount, tags.Length);
-            
-            for(int i = 0; i < expectedResultsCount; ++i) {
-                Assert.Equal(normalForms[i], significances[i].NormalForm);
-                Assert.Equal(tags[i], significances[i].Tag.DebugValue);
-            }
+        [InlineData("Ru", "квазирыбой", 1, "квазирыба=NOUN,anim,femn sing,ablt")]
+        [InlineData("Ru", "космодома", 4, 
+            "космодома=ADVB;" + 
+            "космодом=NOUN,inan,masc sing,gent;" + 
+            "космодом=NOUN,inan,masc plur,nomn;" + 
+            "космодом=NOUN,inan,masc plur,accs")]
+        public void ParseKnownPrefix_MultipleSignificances(string language, string word, int expectedResultsCount, string expectedLexemesWithTags) {
+            var lexemesAndTags = ExtractLexemesAndTags(expectedLexemesWithTags);
+            TestParse(language, word, expectedResultsCount, lexemesAndTags.lexemes, lexemesAndTags.tags);
         }
 
         [Fact]
         public void ParseKnownPrefix_NotNoun() {
-            var analyzerUnit = Utils.GetAnalyzerUnit<KnownPrefixAnalyzerUnit>("Ru");
-            var significances = analyzerUnit.Parse("квазичетыре", Array.Empty<IMorphAnalyzerUnit>());
-            Assert.Empty(significances);
+            TestParse("Ru", "квазичетыре", 0, Array.Empty<string>(), Array.Empty<string>());
         }
 
         [Theory]
         [InlineData("Ru", "супер-псевдо-сверх-экстра-эконом-квази-еврорыбой", "супер-псевдо-сверх-экстра-эконом-квази-еврорыба", "NOUN,anim,femn sing,ablt")]
         public void ParseMultiplePrefixes(string language, string word, string expectedNormalForm, string expectedTag) {
-            var analyzerUnit = Utils.GetAnalyzerUnit<KnownPrefixAnalyzerUnit>(language);
-            var significances = analyzerUnit.Parse(word, Array.Empty<IMorphAnalyzerUnit>());
-            
-            Assert.Equal(expectedNormalForm, significances[0].NormalForm);
-            Assert.Equal(expectedTag, significances[0].Tag.DebugValue);
+            TestParse(language, word, 3, Enumerable.Repeat(expectedNormalForm, 3).ToArray(), Enumerable.Repeat(expectedTag, 3).ToArray());
         }
         
         [Theory]
-        [InlineData("Ru", "псевдо-рыба", "псевдо-рыба;псевдо-рыбы;псевдо-рыбе;псевдо-рыбу;псевдо-рыбой;псевдо-рыбою;псевдо-рыбе;псевдо-рыбы;псевдо-рыб;псевдо-рыбам;псевдо-рыб;псевдо-рыбами;псевдо-рыбах")]
-        public void GetLexemes(string language, string word, string expectedLexemes) {
-            var analyzerUnit = Utils.GetAnalyzerUnit<KnownPrefixAnalyzerUnit>(language);
-            var significances = analyzerUnit.Parse(word, Array.Empty<IMorphAnalyzerUnit>());
-            var lexemes = analyzerUnit.GetLexemes(significances[0]);
-            
-            Assert.Equal(expectedLexemes, string.Join(';', lexemes.Select(lexeme => lexeme.RawWord)));
+        [InlineData("Ru", "псевдо-рыба", 
+            "псевдо-рыба=NOUN,anim,femn sing,nomn;" +
+            "псевдо-рыбы=NOUN,anim,femn sing,gent;" +
+            "псевдо-рыбе=NOUN,anim,femn sing,datv;" +
+            "псевдо-рыбу=NOUN,anim,femn sing,accs;" +
+            "псевдо-рыбой=NOUN,anim,femn sing,ablt;" +
+            "псевдо-рыбою=NOUN,anim,femn sing,ablt,V-oy;" +
+            "псевдо-рыбе=NOUN,anim,femn sing,loct;" +
+            "псевдо-рыбы=NOUN,anim,femn plur,nomn;" +
+            "псевдо-рыб=NOUN,anim,femn plur,gent;" +
+            "псевдо-рыбам=NOUN,anim,femn plur,datv;" +
+            "псевдо-рыб=NOUN,anim,femn plur,accs;" +
+            "псевдо-рыбами=NOUN,anim,femn plur,ablt;" +
+            "псевдо-рыбах=NOUN,anim,femn plur,loct")]
+        public void GetLexemes(string language, string word, string expectedLexemesWithTags) {
+            var lexemesAndTags = ExtractLexemesAndTags(expectedLexemesWithTags);
+            TestGetLexemes(language, word, lexemesAndTags.lexemes, lexemesAndTags.tags);
         }
     }
 }

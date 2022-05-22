@@ -12,22 +12,30 @@ namespace MorphAnalyzer.Tests {
         
         private static Dictionary<string, LanguageDictionary> Dictionaries { get; set; }
 
-        public static T GetAnalyzerUnit<T>(string language) where T : IMorphAnalyzerUnit {
-            language = language.ToLower();
-            AnalyzerUnits ??= new Dictionary<string, List<IMorphAnalyzerUnit>>();
-            if(!AnalyzerUnits.ContainsKey(language))
-                CreateAnalyzerUnitsForSpecificLanguage(language);
+        // ReSharper disable once FieldCanBeMadeReadOnly.Local
+        private static object _syncRoot = new object();
 
-            var result = AnalyzerUnits[language].First(x => x.GetType() == typeof(T));
-            return (T) result;
+        public static T GetAnalyzerUnit<T>(string language) where T : IMorphAnalyzerUnit {
+            lock(_syncRoot) {
+                language = language.ToLower();
+                AnalyzerUnits ??= new Dictionary<string, List<IMorphAnalyzerUnit>>();
+                if(!AnalyzerUnits.ContainsKey(language))
+                    CreateAnalyzerUnitsForSpecificLanguage(language);
+
+                var result = AnalyzerUnits[language].First(x => x.GetType() == typeof(T));
+                return (T) result;
+            }
         }
 
         public static LanguageDictionary GetLanguageDictionary(string language) {
-            Dictionaries ??= new Dictionary<string, LanguageDictionary>();
-            language = language.ToLower();
-            if(!Dictionaries.ContainsKey(language))
-                Dictionaries.Add(language, LanguageDictionaryReader.Read(Path.Combine(DICTIONARIES_PATH, language)));
-            return Dictionaries[language];
+            lock(_syncRoot) {
+                Dictionaries ??= new Dictionary<string, LanguageDictionary>();
+                language = language.ToLower();
+                if(!Dictionaries.ContainsKey(language))
+                    Dictionaries.Add(language,
+                        LanguageDictionaryReader.Read(Path.Combine(DICTIONARIES_PATH, language)));
+                return Dictionaries[language];
+            }
         }
         
         private static void CreateAnalyzerUnitsForSpecificLanguage(string language) {
