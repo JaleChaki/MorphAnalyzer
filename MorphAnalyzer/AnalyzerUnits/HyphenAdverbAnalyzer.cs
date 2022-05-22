@@ -4,12 +4,16 @@ namespace MorphAnalyzer.AnalyzerUnits {
     public class HyphenAdverbAnalyzer : IMorphAnalyzerUnit {
         public bool Terminal => true;
 
+        private readonly WordTag _tag;
+        
         private const string PREFIX = "по-";
 
         private ISimpleMorphAnalyzer NextAnalyzer { get; }
 
         internal HyphenAdverbAnalyzer(ISimpleMorphAnalyzer nextAnalyzer) {
             NextAnalyzer = nextAnalyzer;
+            // ReSharper disable once StringLiteralTypo
+            _tag = WordTagBuilder.Build("ADVB");
         }
         
         public IReadOnlyList<MorphologicalSignificance> Parse(string word, IReadOnlyList<IMorphAnalyzerUnit> analyzerConveyor) {
@@ -23,11 +27,15 @@ namespace MorphAnalyzer.AnalyzerUnits {
             var unprefixedWord = word[PREFIX.Length..];
             var significances = NextAnalyzer.Parse(unprefixedWord, analyzerConveyor.Append(this).ToArray());
             var result = new List<MorphologicalSignificance>();
+            var seenNormalForms = new HashSet<string>();
             foreach(var parse in significances) {
                 if(!IsAdjective(parse.PartOfSpeech) || parse.Number != Number.Single || parse.Case != Case.Dative)
                     continue;
+                if(seenNormalForms.Contains(parse.NormalForm))
+                    continue;
                 
                 result.Add(BuildMorphologicalSignificance(parse));
+                seenNormalForms.Add(parse.NormalForm);
             }
 
             return result;
@@ -42,7 +50,7 @@ namespace MorphAnalyzer.AnalyzerUnits {
                     word,
                     word,
                     null,
-                    internalSignificance.Tag,
+                    _tag,
                     this,
                     internalSignificance.Probability * 0.7d
                 );

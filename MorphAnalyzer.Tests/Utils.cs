@@ -48,6 +48,7 @@ namespace MorphAnalyzer.Tests {
                 dictionaryAnalyzer,
                 new KnownPrefixAnalyzer(composite, dictionary.KnownPrefixes),
                 new HyphenSeparatedParticleAnalyzer(composite, dictionary.Hyphens),
+                new HyphenAdverbAnalyzer(composite),
                 new UnknownPrefixAnalyzer(composite)
             };
             composite.AnalyzerUnits = list;
