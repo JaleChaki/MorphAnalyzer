@@ -72,8 +72,12 @@ namespace MorphAnalyzer.AnalyzerUnits {
             return result;
         }
 
+        // ReSharper disable once IdentifierTypo
         private WordTag ReplaceGrammemes(WordTag original) {
             T SafeGetDictionaryKey<T>(T key) {
+                if(key == null)
+                    return default;
+                
                 return EqualGrammemes.ContainsKey(key) ? (T)EqualGrammemes[key] : key;
             }
 
@@ -102,34 +106,61 @@ namespace MorphAnalyzer.AnalyzerUnits {
 
         private bool TagEquals(WordTag a, WordTag b) {
             return a.PartOfSpeech == b.PartOfSpeech &&
-                   a.Animacy == b.Animacy &&
-                   a.Aspect == b.Aspect &&
                    a.Case == b.Case &&
-                   a.Gender == b.Gender &&
-                   a.Involvement == b.Involvement &&
-                   a.Mood == b.Mood &&
                    a.Number == b.Number &&
                    a.Person == b.Person &&
-                   a.Tense == b.Tense &&
-                   a.Transitivity == b.Transitivity &&
-                   a.Voice == b.Voice &&
-                   a.Mics.SequenceEqual(b.Mics);
+                   a.Tense == b.Tense;
         }
 
-        private MorphologicalSignificance BuildMorphologicalSignificanceAsVariableBoth(MorphologicalSignificance left, MorphologicalSignificance right) {
+        private MorphologicalSignificance BuildMorphologicalSignificanceAsVariableBoth(MorphologicalSignificance left, MorphologicalSignificance right, double? customProbability = null) {
             return new MorphologicalSignificance(left.RawWord + '-' + right.RawWord,
                 left.NormalForm + '-' + right.NormalForm,
                 new InternalData(left, right, false),
                 left.Tag,
                 this,
-                left.Probability * 0.75d
+                customProbability ?? left.Probability * 0.75d
             );
         }
 
         private record InternalData(MorphologicalSignificance Left, MorphologicalSignificance Right, bool LeftFixed);
         
         public IEnumerable<MorphologicalSignificance> GetLexemes(MorphologicalSignificance morphologicalSignificance) {
-            throw new NotImplementedException();
+            var internalData = (InternalData) morphologicalSignificance.InternalData;
+
+            if(internalData.LeftFixed) {
+                // TODO
+                throw new NotImplementedException();
+            } else {
+                var leftSignificance = internalData.Left;
+                var rightSignificance = internalData.Right;
+                var leftLexemes = leftSignificance.Method.GetLexemes(leftSignificance);
+                var rightLexemes = rightSignificance.Method.GetLexemes(rightSignificance);
+
+                return MergeLexemes(leftLexemes, rightLexemes);
+            }
+        }
+
+        private IEnumerable<MorphologicalSignificance> MergeLexemes(IEnumerable<MorphologicalSignificance> leftLexemes,
+            IEnumerable<MorphologicalSignificance> rightLexemes) {
+
+            leftLexemes = leftLexemes.ToArray();
+            foreach(var right in rightLexemes) {
+                var rightTagFeatures = ReplaceGrammemes(right.Tag).ToArray();
+                int minDistance = 1000000;
+                MorphologicalSignificance closestLexeme = null;
+                foreach(var left in leftLexemes) {
+                    var leftTagFeatures = ReplaceGrammemes(left.Tag).ToArray();
+                    var symmetricDistance = rightTagFeatures.Except(leftTagFeatures).Count() +
+                                            leftTagFeatures.Except(rightTagFeatures).Count();
+                    if(symmetricDistance < minDistance) {
+                        minDistance = symmetricDistance;
+                        closestLexeme = left;
+                    }
+                }
+                yield return BuildMorphologicalSignificanceAsVariableBoth(closestLexeme, 
+                    right, 
+                    (closestLexeme.Probability + right.Probability) / 2 * 0.75d);
+            }
         }
     }
 }

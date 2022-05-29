@@ -41,12 +41,7 @@ namespace MorphAnalyzer {
 
         public IReadOnlyList<MorphologicalSignificance> Inflect(MorphologicalSignificance morphologicalSignificance, InflectOptions options) {
             bool Satisfies(MorphologicalSignificance lexeme) {
-                var lexemeTagValues = new object?[] {
-                    lexeme.Animacy, lexeme.Aspect, lexeme.Case, lexeme.Gender,
-                    lexeme.Involvement, lexeme.Mood, lexeme.Number, lexeme.Person, lexeme.Tense, lexeme.Transitivity,
-                    lexeme.Voice, lexeme.PartOfSpeech
-                }.Concat(lexeme.Mics.Cast<object?>())
-                    .Where(x => x != null).ToArray();
+                var lexemeTagValues = lexeme.Tag.ToArray();
 
                 var optionsTagValues = new object?[] {
                     options.Animacy, options.Aspect, options.Case, options.Gender,
