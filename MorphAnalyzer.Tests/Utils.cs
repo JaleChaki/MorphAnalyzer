@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using MorphAnalyzer.AnalyzerUnits;
+using MorphAnalyzer.AnalyzerUnits.Helpers;
 
 namespace MorphAnalyzer.Tests {
     internal static class Utils {
@@ -37,14 +38,29 @@ namespace MorphAnalyzer.Tests {
                 return Dictionaries[language];
             }
         }
+
+        public static MorphAnalyzer GetMorphAnalyzer(string language) {
+            lock(_syncRoot) {
+                var dictionary = GetLanguageDictionary(language);
+                return new MorphAnalyzer(dictionary);
+            }
+        }
         
         private static void CreateAnalyzerUnitsForSpecificLanguage(string language) {
             language = language.ToLower();
             var dictionary = GetLanguageDictionary(language);
             AnalyzerUnits ??= new Dictionary<string, List<IMorphAnalyzerUnit>>();
-            var dictionaryAnalyzer = new DictionaryAnalyzer(dictionary);
+            
             var composite = new AnalyzerUnitComposite();
-            var list = new List<IMorphAnalyzerUnit> {
+            var list = CreateAnalyzerUnitsWithComposite(dictionary, composite);
+            composite.AnalyzerUnits = list;
+            
+            AnalyzerUnits.Add(language, list);
+        }
+
+        private static List<IMorphAnalyzerUnit> CreateAnalyzerUnitsWithComposite(LanguageDictionary dictionary, ISimpleMorphAnalyzer composite) {
+            var dictionaryAnalyzer = new DictionaryAnalyzer(dictionary);
+            return new List<IMorphAnalyzerUnit> {
                 dictionaryAnalyzer,
                 new KnownPrefixAnalyzer(composite, dictionary.KnownPrefixes),
                 new HyphenSeparatedParticleAnalyzer(composite, dictionary.Hyphens),
@@ -52,9 +68,6 @@ namespace MorphAnalyzer.Tests {
                 new HyphenatedWordsAnalyzer(composite, dictionary.KnownPrefixes),
                 new UnknownPrefixAnalyzer(composite)
             };
-            composite.AnalyzerUnits = list;
-            
-            AnalyzerUnits.Add(language, list);
         }
         
     }

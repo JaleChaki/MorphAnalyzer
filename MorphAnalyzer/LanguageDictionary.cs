@@ -1,10 +1,6 @@
-﻿using System.Runtime.CompilerServices;
-using DawgSharp;
+﻿using DawgSharp;
 using MorphAnalyzer.AnalyzerUnits;
 
-#if DEBUG
-[assembly: InternalsVisibleTo("MorphAnalyzer.Tests")]
-#endif
 namespace MorphAnalyzer {
     
     internal class LanguageDictionary {

@@ -6,7 +6,7 @@ using System.Text.Json;
 #endif
 
 namespace MorphAnalyzer {
-    internal class LanguageDictionaryReader {
+    internal static class LanguageDictionaryReader {
         private const string PARADIGM_PREFIXES_FILENAME = "paradigm_prefixes.json";
         private const string PARADIGMS_FILENAME = "paradigms.json";
         private const string SUFFIX_FILENAME = "suffixes.json";

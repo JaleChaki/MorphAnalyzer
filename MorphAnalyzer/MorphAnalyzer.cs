@@ -8,8 +8,10 @@ namespace MorphAnalyzer {
         
         private List<IMorphAnalyzerUnit> AnalyzerUnits { get; }
         
-        public MorphAnalyzer(string language = "ru") {
-            Dictionary = LanguageDictionaryReader.Read(Path.Combine(@"Dictionaries\", language));
+        public MorphAnalyzer(string language = "ru") : this(LanguageDictionaryReader.Read(Path.Combine(@"Dictionaries\", language))) { }
+
+        internal MorphAnalyzer(LanguageDictionary dictionary) {
+            Dictionary = dictionary;
             var dictionaryAnalyzer = new DictionaryAnalyzer(Dictionary);
             AnalyzerUnits = new List<IMorphAnalyzerUnit> {
                 dictionaryAnalyzer, 
@@ -20,6 +22,11 @@ namespace MorphAnalyzer {
             };
         }
 
+        internal MorphAnalyzer(LanguageDictionary dictionary, IEnumerable<IMorphAnalyzerUnit> analyzerUnits) {
+            Dictionary = dictionary;
+            AnalyzerUnits = analyzerUnits.ToList();
+        }
+        
         public IReadOnlyList<MorphologicalSignificance> Parse(string word) {
             return ((ISimpleMorphAnalyzer) this).Parse(word, Array.Empty<IMorphAnalyzerUnit>());
         }

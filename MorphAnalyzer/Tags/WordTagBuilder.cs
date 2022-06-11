@@ -127,7 +127,7 @@ namespace MorphAnalyzer {
                 return dictionary[tag];
             }
 
-            throw new Exception();
+            throw new Exception("Part of speech not found");
         }
         
         private static T? SelectTagFrom<T>(string[] tags, IReadOnlyDictionary<string, T> dictionary) where T : struct {
