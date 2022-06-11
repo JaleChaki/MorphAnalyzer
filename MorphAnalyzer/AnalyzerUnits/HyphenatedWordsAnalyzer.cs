@@ -31,7 +31,7 @@ namespace MorphAnalyzer.AnalyzerUnits {
             var leftParses = NextAnalyzer.Parse(left, analyzerConveyor.Append(this).ToArray());
             var rightParses = NextAnalyzer.Parse(right, analyzerConveyor.Append(this).ToArray());
 
-            return ParseAsVariableBoth(leftParses, rightParses);
+            return ParseAsVariableBoth(leftParses, rightParses).Concat(ParseAsFixedLeft(leftParses, rightParses)).ToArray();
         }
 
         private bool ShouldParse(string word) {
@@ -49,14 +49,32 @@ namespace MorphAnalyzer.AnalyzerUnits {
             return KnownPrefixes.Any(word.StartsWith);
         }
 
+        private IReadOnlyList<MorphologicalSignificance> ParseAsFixedLeft(IReadOnlyList<MorphologicalSignificance> leftParses, IReadOnlyList<MorphologicalSignificance> rightParses) {
+            var rightTags = rightParses.Select(x => ReplaceGrammemes(x.Tag)).ToArray();
+            var result = new List<MorphologicalSignificance>();
+            foreach(var leftParse in leftParses) {
+                if(!IsFixedForm(leftParse))
+                    continue;
+                
+                foreach(var rightParse in rightParses) {
+                    result.Add(BuildMorphologicalSignificanceAsFixedLeft(rightParse, leftParse.NormalForm));
+                }
+            }
+            return result;
+        }
+
+        private bool IsFixedForm(MorphologicalSignificance significance) {
+            var lexemes = significance.Method.GetLexemes(significance).ToArray();
+            var firstForm = lexemes[0].NormalForm;
+            return lexemes.All(x => x.RawWord == firstForm);
+        }
+
         private IReadOnlyList<MorphologicalSignificance> ParseAsVariableBoth(IReadOnlyList<MorphologicalSignificance> leftParses, IReadOnlyList<MorphologicalSignificance> rightParses) {
             var rightTags = rightParses.Select(parse => ReplaceGrammemes(parse.Tag)).ToArray();
             var result = new List<MorphologicalSignificance>();
             foreach(var leftParse in leftParses) {
                 var leftTag = leftParse.Tag;
                 
-                // TODO skip if Tag unknown
-
                 leftTag = ReplaceGrammemes(leftTag);
 
                 for(int i = 0; i < rightParses.Count; ++i) {
@@ -113,12 +131,24 @@ namespace MorphAnalyzer.AnalyzerUnits {
         }
 
         private MorphologicalSignificance BuildMorphologicalSignificanceAsVariableBoth(MorphologicalSignificance left, MorphologicalSignificance right, double? customProbability = null) {
-            return new MorphologicalSignificance(left.RawWord + '-' + right.RawWord,
+            return new MorphologicalSignificance(
+                left.RawWord + '-' + right.RawWord,
                 left.NormalForm + '-' + right.NormalForm,
                 new InternalData(left, right, false),
                 left.Tag,
                 this,
                 customProbability ?? left.Probability * 0.75d
+            );
+        }
+
+        private MorphologicalSignificance BuildMorphologicalSignificanceAsFixedLeft(MorphologicalSignificance right, string left) {
+            return new MorphologicalSignificance(
+                left + '-' + right.RawWord,
+                left + '-' + right.NormalForm,
+                new InternalData(null, right, true),
+                right.Tag,
+                this,
+                right.Probability * 0.75d
             );
         }
 

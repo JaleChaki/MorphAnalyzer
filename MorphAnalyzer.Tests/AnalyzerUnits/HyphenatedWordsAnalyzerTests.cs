@@ -30,6 +30,16 @@ namespace MorphAnalyzer.Tests.AnalyzerUnits {
             var lexemesAndTags = ExtractLexemesAndTags(expectedLexemesAndTags);
             TestGetLexemes(language, word, lexemesAndTags.lexemes, lexemesAndTags.tags);
         }
+
+        [Theory]
+        [InlineData("Ru", "воздушно-горного", 
+            "воздушно-горный=ADJF masc,sing,gent;" +
+            "воздушно-горный=ADJF anim,masc,sing,accs;" +
+            "воздушно-горный=ADJF neut,sing,gent")]
+        public void Parse_AsFixedLeft(string language, string word, string expectedLexemesAndTags) {
+            var lexemesAndTags = ExtractLexemesAndTags(expectedLexemesAndTags);
+            TestParse(language, word, lexemesAndTags.lexemes.Length, lexemesAndTags.lexemes, lexemesAndTags.tags);
+        }
         
     }
 }
