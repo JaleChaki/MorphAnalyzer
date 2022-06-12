@@ -27,7 +27,7 @@ namespace MorphAnalyzer {
         
         public Voice? Voice { get; }
         
-        public IReadOnlyList<MicsTags> Mics { get; }
+        public IReadOnlyList<string> Mics { get; }
 
 #if DEBUG
         // ReSharper disable once UnusedAutoPropertyAccessor.Global
@@ -37,7 +37,7 @@ namespace MorphAnalyzer {
         
         internal WordTag(PartOfSpeech partOfSpeech, Animacy? animacy, Aspect? aspect, Case? @case, Gender? gender,
             Involvement? involvement, Mood? mood, Number? number, Person? person, Tense? tense,
-            Transitivity? transitivity, Voice? voice, IReadOnlyList<MicsTags> mics
+            Transitivity? transitivity, Voice? voice, IReadOnlyList<string> mics
 #if DEBUG
             , string debugValue            
 #endif

@@ -32,7 +32,7 @@ namespace MorphAnalyzer {
 
         public Voice? Voice => Tag.Voice;
 
-        public IReadOnlyList<MicsTags> Mics => Tag.Mics;
+        public IReadOnlyList<string> Mics => Tag.Mics;
 
         public double Probability { get; internal set; }
         

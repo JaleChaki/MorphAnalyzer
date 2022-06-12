@@ -94,7 +94,25 @@ namespace MorphAnalyzer {
             { "actv", Voice.Active },
             { "pssv", Voice.Passive }
         };
+        
+        private static IReadOnlyList<string> KnownTags { get; }
 #endregion
+
+        static WordTagBuilder() {
+            KnownTags = PartOfSpeechMapper.Keys
+                .Concat(AnimacyMapper.Keys)
+                .Concat(AspectMapper.Keys)
+                .Concat(GenderMapper.Keys)
+                .Concat(NumberMapper.Keys)
+                .Concat(CaseMapper.Keys)
+                .Concat(TransitivityMapper.Keys)
+                .Concat(PersonMapper.Keys)
+                .Concat(TenseMapper.Keys)
+                .Concat(InvolvementMapper.Keys)
+                .Concat(MoodMapper.Keys)
+                .Concat(VoiceMapper.Keys)
+                .ToArray();
+        }
 
         public static WordTag Build(string tagDescriptor) {
             var tags = tagDescriptor.Replace(' ', ',').Split(',');
@@ -113,7 +131,7 @@ namespace MorphAnalyzer {
             var voice = SelectTagFrom(tags, VoiceMapper);
 
             return new WordTag(partOfSpeech, animacy, aspect, @case, gender, involvement, mood, number, person, tense,
-                transitivity, voice, ArraySegment<MicsTags>.Empty
+                transitivity, voice, SelectUnknownTags(tags)
 #if DEBUG
                 , tagDescriptor
 #endif
@@ -138,6 +156,10 @@ namespace MorphAnalyzer {
             }
 
             return null;
+        }
+
+        private static string[] SelectUnknownTags(string[] tags) {
+            return tags.Except(KnownTags).ToArray();
         }
         
     }

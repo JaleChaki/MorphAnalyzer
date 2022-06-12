@@ -44,6 +44,14 @@ namespace MorphAnalyzer.Tests {
             Assert.True(results.SequenceEqual(results.OrderByDescending(x => x.Probability)));
         }
 
+        [Fact]
+        public void InflectWithOptions() {
+            var result = Analyzer.Parse("рыба").First();
+            var lexemes = Analyzer.Inflect(result, new InflectOptions { Case = Case.Dative });
+            Assert.Equal(2, lexemes.Count);
+            Assert.True(lexemes.Select(x => x.RawWord).SequenceEqual(new [] { "рыбе", "рыбам" })); // inflect ignores number, if number not specified
+        }
+        
         private class DummyWordAnalyzer : IMorphAnalyzerUnit {
             public bool Terminal => true;
 
