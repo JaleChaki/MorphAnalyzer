@@ -25,7 +25,7 @@ var s = fishInPluralAndAccusative.RawWord; // рыб
 3. Get grammar info about word (part of speech, animacy, aspect, case, gender, involvement, mood, number, person, tense, transitivity and voice)
 
 ```c#
-fishParse.PartofSpeech; // PartofSpeech.Noun
+fishParse.PartofSpeech;         // PartofSpeech.Noun
 fishParse.Animacy;		// Animacy.Animated
 fishParse.Aspect;		// null (null value means that the aspect is not specified or not applicable for this word)
 fishParse.Case;			// Case.Dative
